@@ -17,7 +17,7 @@
 #include "string.h"
 
 /*DEFINES********************************************/
-#define REQ_DATA		ESP_AVRC_MD_ATTR_TITLE|ESP_AVRC_MD_ATTR_ARTIST|ESP_AVRC_MD_ATTR_ALBUM
+#define REQ_DATA		ESP_AVRC_MD_ATTR_TITLE|ESP_AVRC_MD_ATTR_ARTIST|ESP_AVRC_MD_ATTR_PLAYING_TIME
 
 #ifndef CAP_MASK
 #define CAP_MASK
@@ -36,8 +36,6 @@
 #define VOLUME_CHANGE		0x01<<13
 #endif
 
-#define DEVICE_CAP			REACHED_END|PLAY_STATUS|TRACK_CHANGE|REACHED_START|POS_CHANGE|VOLUME_CHANGE
-
 /*GLOBAL VARIABLES************************************************/
 static esp_avrc_rn_evt_cap_mask_t s_avrc_peer_rn_cap;
 
@@ -46,6 +44,8 @@ static uint8_t abs_volume;
 /*Meta data*/
 static t_metadata_t track_meta;
 static QueueHandle_t md_track_queue = NULL;
+static esp_avrc_playback_stat_t tk_status;
+static QueueHandle_t status_tk_queue = NULL;
 
 /*PROTOTYPES*****************************************************/
 /*Track info*/
@@ -91,16 +91,20 @@ static void request_pos_cd()
 static void avr_event_cb(uint8_t event_id, esp_avrc_rn_param_t *event_parameter)
 {
     switch (event_id) {
-    /* when new track is loaded, this event comes */
-    case ESP_AVRC_RN_TRACK_CHANGE:
-    	request_tk_md();
-        break;
     /* when track status changed, this event comes */
     case ESP_AVRC_RN_PLAY_STATUS_CHANGE:
-
-        break;
+		tk_status = event_parameter->playback;
+		if(status_tk_queue != NULL)
+			xQueueSend(status_tk_queue, &tk_status, 1);
+    	request_pb_cd();
+		break;
+	/* when new track is loaded, this event comes */
+	case ESP_AVRC_RN_TRACK_CHANGE:
+		request_tk_md();
+		break;
     /* when track playing position changed, this event comes */
     case ESP_AVRC_RN_PLAY_POS_CHANGED:
+    	request_pos_cd();
         break;
     /* others */
     default:
@@ -203,6 +207,7 @@ static void a2d_event_cb(esp_a2d_cb_event_t event, esp_a2d_cb_param_t *param)
 static void avr_ctrl_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *param)
 {
 
+	ESP_LOGI(BT_ID, "CTRL EVENT ID: %d", event);
     switch (event) {
     /* when connection state changed, this event comes */
     case ESP_AVRC_CT_CONNECTION_STATE_EVT:
@@ -220,7 +225,7 @@ static void avr_ctrl_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *pa
     /* when passthrough responsed, this event comes */
     case ESP_AVRC_CT_PASSTHROUGH_RSP_EVT:
     {
-    	 ESP_LOGI("BT CTRL", "AVRC passthrough rsp: key_code 0x%x, key_state %d", param->psth_rsp.key_code, param->psth_rsp.key_state);
+    	 ESP_LOGI(BT_ID, "AVRC passthrough rsp: key_code 0x%x, key_state %d", param->psth_rsp.key_code, param->psth_rsp.key_state);
         break;
     }
     /* when metadata responsed, this event comes */
@@ -240,6 +245,10 @@ static void avr_ctrl_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *pa
         case METAD_ALBUM:
         	memcpy(track_meta.album, (char *)param->meta_rsp.attr_text, param->meta_rsp.attr_length);
         	track_meta.album[param->meta_rsp.attr_length] = 0;
+        	break;
+        case METAD_PLAY_TIME:
+        	memcpy(track_meta.play_time, (char *)param->meta_rsp.attr_text, param->meta_rsp.attr_length);
+        	track_meta.play_time[param->meta_rsp.attr_length] = 0;
         	if(md_track_queue != NULL)
         		xQueueSend(md_track_queue, &track_meta, 1);
         	break;
@@ -248,6 +257,11 @@ static void avr_ctrl_cb(esp_avrc_ct_cb_event_t event, esp_avrc_ct_cb_param_t *pa
         }
     	break;
     }
+    case ESP_AVRC_CT_PLAY_STATUS_RSP_EVT:
+    {
+    	break;
+    }
+
     /* when notified, this event comes */
     case ESP_AVRC_CT_CHANGE_NOTIFY_EVT:
     {
@@ -398,10 +412,17 @@ void a2dp_send_cmd(esp_avrc_pt_cmd_t cmd)
 	esp_avrc_ct_send_passthrough_cmd(0, cmd, ESP_AVRC_PT_CMD_STATE_PRESSED);
 }
 
-QueueHandle_t trank_reg_md()
+QueueHandle_t track_reg_md()
 {
 	if(md_track_queue == NULL)
 		md_track_queue = xQueueCreate(MD_TRACK_BUFF, MD_TRACK_SIZE);
 	return md_track_queue;
+}
+
+QueueHandle_t track_reg_status()
+{
+	if(status_tk_queue == NULL)
+		status_tk_queue = xQueueCreate(MD_TRACK_BUFF, sizeof(esp_avrc_playback_stat_t));
+	return status_tk_queue;
 }
 

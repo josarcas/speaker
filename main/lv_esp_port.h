@@ -34,7 +34,7 @@
 
 #define LCD_PIXEL_CLOCK			(20 * 1000 * 1000)
 
-#define LVGL_TICK_PERIOD_MS    	5
+#define LVGL_TICK_PERIOD_MS    	10
 
 //AXP
 #define LCD_BRIGTHNESS			DCDC_3

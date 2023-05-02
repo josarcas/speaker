@@ -22,15 +22,17 @@
 #ifndef METADATA_ATTR
 #define METADATA_ATTR
 #define MAX_METADATA_LEN			50
-#define METAD_TITLE_ID				1
-#define METAD_ARTIST_ID				2
-#define METAD_ALBUM					4
+#define METAD_TITLE_ID				0x01
+#define METAD_ARTIST_ID				0x02
+#define METAD_ALBUM					0x04
+#define METAD_PLAY_TIME				0x40
 #endif
 /*TYPEDEFS*********************************************/
 typedef struct{
 	char title[MAX_METADATA_LEN];
 	char artist[MAX_METADATA_LEN];
 	char album[MAX_METADATA_LEN];
+	char play_time[MAX_METADATA_LEN];
 }t_metadata_t;
 
 /*PROTOTYPES*******************************************/

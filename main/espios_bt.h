@@ -37,6 +37,7 @@ void a2dp_get_metadata(t_metadata_t *data);
 void a2dp_set_volume(uint8_t volume);
 void a2dp_send_cmd(esp_avrc_pt_cmd_t cmd);
 
-QueueHandle_t trank_reg_md();
+QueueHandle_t track_reg_md();
+QueueHandle_t track_reg_status();
 
 #endif /* MAIN_ESPIOS_BT_H_ */
