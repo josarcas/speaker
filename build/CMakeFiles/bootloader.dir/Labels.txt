@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+D:/JoseArratia/Documents/interfaz_m5stack/Project/speaker/build/CMakeFiles/bootloader
+D:/JoseArratia/Documents/interfaz_m5stack/Project/speaker/build/CMakeFiles/bootloader.rule
+D:/JoseArratia/Documents/interfaz_m5stack/Project/speaker/build/CMakeFiles/bootloader-complete.rule
+D:/JoseArratia/Documents/interfaz_m5stack/Project/speaker/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+D:/JoseArratia/Documents/interfaz_m5stack/Project/speaker/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+D:/JoseArratia/Documents/interfaz_m5stack/Project/speaker/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+D:/JoseArratia/Documents/interfaz_m5stack/Project/speaker/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+D:/JoseArratia/Documents/interfaz_m5stack/Project/speaker/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+D:/JoseArratia/Documents/interfaz_m5stack/Project/speaker/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+D:/JoseArratia/Documents/interfaz_m5stack/Project/speaker/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
